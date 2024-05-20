@@ -17,20 +17,21 @@ import warnings
 import pandas as pd
 import numpy as np
 import os
+import fire
 import sys
 sys.path.insert(1, '../dataset')
 
 warnings.filterwarnings("ignore")
-from pred_ABTE import run_ABTE_test_train
+from pred_ABSA import run_ABSA_test_train
 
 
 # prepare data
 # this part needs to rewrite
 # load
-# data = pd.read_csv('../dataset/normalized/restaurants_train.csv')
-# data_test = pd.read_csv('../dataset/normalized/restaurants_test.csv')
-
 
 
 if __name__ == '__main__':
-    run_ABTE_test_train(adapter=True, lr_schedule=False)
+    pass
+    
+
+    
