@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Usage: ./train.sh ABTE
 
 
