@@ -21,15 +21,39 @@ stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
 
 
+def split_text_into_segments(text, max_segment_length=128):
+    sentences = nltk.sent_tokenize(text)
+    
+    segments = []
+    current_segment = ""
+    
+    for sentence in sentences:
+        if len(current_segment) + len(sentence) <= max_segment_length:
+            current_segment += sentence + " "
+        else:
+            segments.append(current_segment.strip())
+            current_segment = sentence + " "
+    
+    if current_segment:
+        segments.append(current_segment.strip())
+    
+    return segments
+
 def nlp_code(text):
     nlp_text = nlp(text)
     return str(nlp_text)
 
 
 def pre_process(text):
-    tokens = [word for word in nltk.word_tokenize(text.lower()) if word.isalpha()]
-    tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
+    doc = nlp(text.lower())
+    tokens = [token.text for token in doc if token.is_alpha]
+    tokens = [token.lemma_ for token in doc if token.text in tokens and token.text not in stop_words]
     return ' '.join(tokens)
+    
+    # word_tokenize is not thread safe
+    # tokens = [word for word in nltk.word_tokenize(text.lower()) if word.isalpha()]
+    # tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
+    # return ' '.join(tokens)
 
 
 def evl_time(t):

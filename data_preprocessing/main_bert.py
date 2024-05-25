@@ -18,7 +18,7 @@ from transformers import BertTokenizer
 from bert.bert_model import BertAspectExtraction, BertAspectSentimentAnalysis
 from bert.dataset import DatasetAspectExtraction, DatasetAspectSentientAnalysis
 from bert.bert_utils import get_classification_report, get_key_polarity, create_mini_batch_ate, create_mini_batch_absa
-from utils import save_model, load_model, pre_process, nlp_code, evl_time, read_file
+from utils import save_model, load_model, pre_process, nlp_code, evl_time, read_file, split_text_into_segments
 
 # model location
 model_location = "../saved_models/"
@@ -158,18 +158,18 @@ def predict_model_aspect_extraction(sentence, tokenizer):
 
     tokens = tokenizer.tokenize(sentence) 
     word_pieces += tokens
-    
-    #https://stackoverflow.com/questions/70520725/runtimeerror-the-expanded-size-of-the-tensor-585-must-match-the-existing-size
-    max_length = 512
-    if len(word_pieces) > max_length - 2:
-        word_pieces = word_pieces[:max_length - 2]
 
     ids = tokenizer.convert_tokens_to_ids(word_pieces)
-    input_tensor = torch.tensor([ids]).to(DEVICE)
+    input_tensor = torch.tensor([ids], dtype=torch.long).to(DEVICE)
     
-    with torch.no_grad():
-        outputs = model_ATE(input_tensor, None, None)
-        _, predictions = torch.max(outputs, dim=2)
+    try:
+        with torch.no_grad():
+            outputs = model_ATE(input_tensor, None, None)
+            _, predictions = torch.max(outputs, dim=2)
+    except IndexError as e:
+        print(sentence)
+        print('ddddd')
+        raise Exception()
 
         
     predictions = predictions[0].tolist()
@@ -255,12 +255,12 @@ def predict_model_aspect_sentimental_analysis(sentence, aspect, tokenizer):
     word_pieces += t1
     word_pieces += ['[sep]']
     word_pieces += t2
-
     segment_tensor = [0] + [0] * len(t1) + [0] + [1] * len(t2)
 
     ids = tokenizer.convert_tokens_to_ids(word_pieces)
-    input_tensor = torch.tensor([ids]).to(DEVICE)
-    segment_tensor = torch.tensor(segment_tensor).to(DEVICE)
+    input_tensor = torch.tensor([ids], dtype=torch.long).to(DEVICE)
+    segment_tensor = torch.tensor(segment_tensor, dtype=torch.long).to(DEVICE)
+    #print(len(input_tensor),'+',len(segment_tensor))
 
     with torch.no_grad():
         outputs = model_ABSA(input_tensor, None, None,
@@ -278,97 +278,30 @@ model_ABSA = load_model(
     model_ABSA, f'{model_location}bert_aspect_sentiment_analysis.pkl')
 
 
-# def AspectExtractionSentimentAnalysis(text):
-#     terms = []
-#     word = ""
-#     x, y, z = predict_model_aspect_extraction(text, tokenizer)
-#     for i in range(len(y)):
-#         if y[i] == 1:
-#             if len(word) != 0:
-#                 terms.append(word.replace(" ##", ""))
-#             word = x[i]
-#         if y[i] == 2:
-#             word += (" " + x[i])
-
-#     if len(word) != 0:
-#         terms.append(word.replace(" ##", ""))
-
-#     sentiment = []
-#     if len(terms) != 0:
-#         for i in terms:
-#             _, c, p = predict_model_aspect_sentimental_analysis(
-#                 text, i, tokenizer)
-#             sentiment.append(int(c))
-
-#     aspect_key, polarity_key = get_key_polarity(x, terms, sentiment)
-#     return x, terms if terms else [], sentiment if sentiment else [], aspect_key, polarity_key
-
-
-import re
-
-def split_text_into_segments(text, max_segment_length=100):
-    # Split long text into sentences or paragraphs
-    sentences = re.split(r'(?<=[^A-Z].[.?!])\s+(?=[A-Z])', text)
-    
-    segments = []
-    current_segment = ""
-    
-    for sentence in sentences:
-        if len(current_segment) + len(sentence) <= max_segment_length:
-            current_segment += sentence + " "
-        else:
-            segments.append(current_segment.strip())
-            current_segment = sentence + " "
-    
-    if current_segment:
-        segments.append(current_segment.strip())
-    
-    return segments
-
-
 def AspectExtractionSentimentAnalysis(text):
-    segments = split_text_into_segments(text)
-    
-    all_terms = []
-    all_sentiments = []
-    all_aspect_keys = []
-    all_polarity_keys = []
-    X = []
-    
-    for segment in segments:
-        if not segment:
-            continue
-        terms = []
-        word = ""
-        x, y, z = predict_model_aspect_extraction(segment, tokenizer)
-        
-        for i in range(len(y)):
-            if y[i] == 1:
-                if len(word) != 0:
-                    terms.append(word.replace(" ##", ""))
-                word = x[i]
-            if y[i] == 2:
-                word += (" " + x[i])
-        
-        if len(word) != 0:
-            terms.append(word.replace(" ##", ""))
-        
-        sentiment = []
-        if len(terms) != 0:
-            for i in terms:
-                _, c, p = predict_model_aspect_sentimental_analysis(segment, i, tokenizer)
-                sentiment.append(int(c))
-        
-        aspect_key, polarity_key = get_key_polarity(x, terms, sentiment)
-        
-        all_terms.extend(terms)
-        all_sentiments.extend(sentiment)
-        all_aspect_keys.append(aspect_key)
-        all_polarity_keys.append(polarity_key)
-        X.append(x)
-    
-    return X, all_terms, all_sentiments, all_aspect_keys, all_polarity_keys
+    terms = []
+    word = ""
+    x, y, z = predict_model_aspect_extraction(text, tokenizer)
+    for i in range(len(y)):
+        if y[i] == 1:
+            if len(word) != 0:
+                terms.append(word.replace(" ##", ""))
+            word = x[i]
+        if y[i] == 2:
+            word += (" " + x[i])
 
+    if len(word) != 0:
+        terms.append(word.replace(" ##", ""))
+
+    sentiment = []
+    if len(terms) != 0:
+        for i in terms:
+            _, c, p = predict_model_aspect_sentimental_analysis(
+                text, i, tokenizer)
+            sentiment.append(int(c))
+
+    aspect_key, polarity_key = get_key_polarity(x, terms, sentiment)
+    return x, terms if terms else [], sentiment if sentiment else [], aspect_key, polarity_key
 
 # Loading the models again for use
 # model_ABSA = load_model(
@@ -384,11 +317,11 @@ neg_test_in_file_path = f"{data_location}test_negative_reviews.txt"
 pos_val_in_file_path = f"{data_location}val_positive_reviews.txt"
 neg_val_in_file_path = f"{data_location}val_negative_reviews.txt"
 
-positive_out_file_path = f"{data_location}train_negative_reviews_labelled_pr_bert.csv"
+positive_out_file_path = f"{data_location}train_positive_reviews_labelled_pr_bert.csv"
 negative_out_file_path = f"{data_location}train_negative_reviews_labelled_pr_bert.csv"
-pos_test_out_file_path = f"{data_location}test_negative_reviews_labelled_pr_bert.csv"
+pos_test_out_file_path = f"{data_location}test_positive_reviews_labelled_pr_bert.csv"
 neg_test_out_file_path = f"{data_location}test_negative_reviews_labelled_pr_bert.csv"
-pos_val_out_file_path = f"{data_location}val_negative_reviews_labelled_pr_bert.csv"
+pos_val_out_file_path = f"{data_location}val_positive_reviews_labelled_pr_bert.csv"
 neg_val_out_file_path = f"{data_location}val_negative_reviews_labelled_pr_bert.csv"
 
 
@@ -405,80 +338,83 @@ output_list = [positive_out_file_path, negative_out_file_path,pos_test_out_file_
 # process imdb
 print('Starting process imdb')
 
-
-def process_review(review):
-    review = pre_process(nlp_code(review))
-    tokens, aspects, sentiments, aspect_key, polarity_key = AspectExtractionSentimentAnalysis(
-        review)
-    return [tokens, aspects, aspect_key, polarity_key]
-
-
-def write_to_csv(output_file_path, data):
-    with open(output_file_path, mode='w', newline='', encoding='utf-8') as csv_file:
-        csv_writer = csv.writer(csv_file)
-        csv_writer.writerow(['Review', 'Aspects', 'Aspect Key', 'Sentiments'])
-        csv_writer.writerows(data)
-
-
-# def process_reviews(reviews, output_file_path):
-#     with concurrent.futures.ThreadPoolExecutor() as executor:
-#         futures = []
-#         for review in reviews:
-#             future = executor.submit(process_review, review)
-#             futures.append(future)
-
-#         data = []
-#         for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
-#             result = future.result()
-#             data.append(result)
-
-#     write_to_csv(output_file_path, data)
-
-def process_reviews(reviews, output_file_path, batch_size=30):
-    with open(output_file_path, mode='w', newline='', encoding='utf-8') as csv_file:
-        csv_writer = csv.writer(csv_file)
-        csv_writer.writerow(['Review', 'Aspects', 'Aspect Key', 'Sentiments'])
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = []
-        data = []
-        for review in reviews:
-            future = executor.submit(process_review, review)
-            futures.append(future)
-
-            if len(futures) == batch_size:
-                for future in concurrent.futures.as_completed(futures):
-                    result = future.result()
-                    data.append(result)
-                write_to_csv(output_file_path, data)
-                futures = []
-                data = []
-
-        if futures:
-            for future in concurrent.futures.as_completed(futures):
-                result = future.result()
-                data.append(result)
-            write_to_csv(output_file_path, data)
-
 # total
 # train = pos + neg = 20k
 # test = pos + neg = 25k
 # val = pos + neg = 5k
 # Total = 50k
 
-for reviews, output_file_path in zip(reviews_list, output_list):
-    process_reviews(reviews, output_file_path)
-
 # for reviews, output_file_path in zip(reviews_list, output_list):
-
 #     with open(output_file_path, mode='w', newline='', encoding='utf-8') as csv_file:
 #         csv_writer = csv.writer(csv_file)
 #         csv_writer.writerow(['Review', 'Aspects', 'Aspect Key', 'Sentiments'])
 #         data = []
 #         for review in tqdm(reviews):
-#             review = pre_process(nlp_code(review))
+#             segment = pre_process(nlp_code(review))
 #             tokens, aspects, sentiments, aspect_key, polarity_key = AspectExtractionSentimentAnalysis(
 #                 review)
 #             data.append([tokens, aspects, aspect_key, polarity_key])
 #             csv_writer.writerows(data)
 #         csv_file.close()
+
+
+
+import concurrent.futures
+from tqdm import tqdm
+
+def process_segment(segment):
+    segment = pre_process(nlp_code(segment))
+    # maybe "" after pre process
+    if not segment:
+        return [], [], [], []
+    tokens, aspects, sentiments, aspect_key, polarity_key = AspectExtractionSentimentAnalysis(segment)
+    return tokens, aspects, aspect_key, polarity_key
+
+def write_to_csv(output_file_path, data):
+    with open(output_file_path, mode='a+', newline='', encoding='utf-8') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerows(data)
+
+def process_review(review, max_segment_length=200):
+    segments = split_text_into_segments(review, max_segment_length=max_segment_length)
+    summary_tokens = []
+    summary_aspects = []
+    summary_aspect_key = []
+    summary_polarity_key = []
+    for segment in segments:
+        if not segment:
+            continue
+        tokens, aspects, aspect_key, polarity_key = process_segment(segment)
+        summary_tokens.extend(tokens)
+        summary_aspects.extend(aspects)
+        summary_aspect_key.extend(aspect_key)
+        summary_polarity_key.extend(polarity_key)
+    return [review, summary_tokens, summary_aspects, summary_aspect_key, summary_polarity_key]
+
+def process_reviews(reviews, output_file_path, max_workers=8, batch_size=100):
+    with open(output_file_path, mode='w', newline='', encoding='utf-8') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(['Raw', 'Review', 'Aspects', 'Aspect Key', 'Sentiments'])
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = []
+        progress_bar = tqdm(total=len(reviews), unit='review')
+        for review in reviews:
+            future = executor.submit(process_review, review)
+            futures.append(future)
+
+        batch_data = []
+        for future in concurrent.futures.as_completed(futures):
+            result = future.result()
+            batch_data.append(result)
+
+            if len(batch_data) == batch_size:
+                write_to_csv(output_file_path, batch_data)
+                batch_data = []
+                progress_bar.update(batch_size)
+
+        if batch_data:
+            write_to_csv(output_file_path, batch_data)
+
+for reviews, output_file_path in zip(reviews_list, output_list):
+    process_reviews(reviews, output_file_path)

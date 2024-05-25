@@ -62,28 +62,39 @@ class DetectAspect:
 #     "This cinema is perfect"
 # ]
 
-positive_in_file_path = f"{data_location}/train_positive_reviews.txt"
-negative_in_file_path = f"{data_location}/train_negative_reviews.txt"
+positive_in_file_path = f"{data_location}train_positive_reviews.txt"
+negative_in_file_path = f"{data_location}train_negative_reviews.txt"
+pos_test_in_file_path = f"{data_location}test_positive_reviews.txt"
+neg_test_in_file_path = f"{data_location}test_negative_reviews.txt"
+pos_val_in_file_path = f"{data_location}val_positive_reviews.txt"
+neg_val_in_file_path = f"{data_location}val_negative_reviews.txt"
 
-positive_out_file_path = f"{data_location}/train_negative_reviews_labelled_lda.csv"
-negative_out_file_path = f"{data_location}/train_negative_reviews_labelled_lda.csv"
+positive_out_file_path = f"{data_location}train_negative_reviews_labelled_pr_bert.csv"
+negative_out_file_path = f"{data_location}train_negative_reviews_labelled_pr_bert.csv"
+pos_test_out_file_path = f"{data_location}test_negative_reviews_labelled_pr_bert.csv"
+neg_test_out_file_path = f"{data_location}test_negative_reviews_labelled_pr_bert.csv"
+pos_val_out_file_path = f"{data_location}val_negative_reviews_labelled_pr_bert.csv"
+neg_val_out_file_path = f"{data_location}val_negative_reviews_labelled_pr_bert.csv"
 
 positive_reviews = read_file(positive_in_file_path)
 negative_reviews = read_file(negative_in_file_path)
+pos_test = read_file(pos_test_in_file_path)
+neg_test = read_file(neg_test_in_file_path)
+pos_val = read_file(pos_val_in_file_path)
+neg_val = read_file(neg_val_in_file_path)
 
-reviews_list = [positive_reviews, negative_reviews]
+reviews_list = [positive_reviews, negative_reviews,pos_test, neg_test,pos_val_in_file_path, neg_val_in_file_path]
+output_list = [positive_out_file_path, negative_out_file_path,pos_test_out_file_path, neg_test_out_file_path,pos_val_out_file_path, neg_val_out_file_path]
+
+
+DetectAspect
+
 # Initialize class
-for i in range(0, len(reviews_list)):
-    reviews = reviews_list[i]
-    detector = DetectAspect(reviews)
-    if i == 0:
-        output_file_path = positive_out_file_path
-    else:
-        output_file_path = negative_out_file_path
-
-    with open(output_file_path, mode='a+', newline='', encoding='utf-8') as csv_file:
+for reviews, output_file_path in zip(reviews_list, output_list):
+    with open(output_file_path, mode='w', newline='', encoding='utf-8') as csv_file:
         csv_writer = csv.writer(csv_file)
         csv_writer.writerow(['Review', 'Aspects', 'Sentiments'])
+        detector = DetectAspect(reviews)
         for review in reviews:
             detection = detector.train(review)
             aspects = []
