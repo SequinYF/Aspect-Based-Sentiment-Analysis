@@ -9,12 +9,19 @@ from transformers import pipeline
 from lda.lda_utils import get_processed_doc, get_dictionary_corpus, compute_coherence_values, get_model, get_top_words, \
     find_aspects, aggregate_sentiments
 from utils import pre_process, nlp_code, read_file
-
+import os
 
 # model location
 model_location = "../saved_models/"
 # Data location
 data_location = "../dataset/raw/"
+
+
+if not os.path.exists(model_location):
+    os.makedirs(model_location)
+    print(f"'{model_location}' created.")
+else:
+    print(f"'{model_location}' exist")
 
 
 sentiment_analyzer = pipeline('sentiment-analysis')
@@ -25,9 +32,12 @@ class DetectAspect:
         self.document = review_document
         self.start = 2
         self.processed_doc = get_processed_doc(self.document)
-        self.dictionary, self.corpus = get_dictionary_corpus(self.processed_doc)
-        self.coherence_values = compute_coherence_values(self.dictionary, self.corpus, self.processed_doc, self.start)
-        self.optimal_model, self.optimal_num_topics = get_model(self.coherence_values, self.start)
+        self.dictionary, self.corpus = get_dictionary_corpus(
+            self.processed_doc)
+        self.coherence_values = compute_coherence_values(
+            self.dictionary, self.corpus, self.processed_doc, self.start)
+        self.optimal_model, self.optimal_num_topics = get_model(
+            self.coherence_values, self.start)
         self.top_words = get_top_words(self.optimal_model)
 
     def train(self, text):
