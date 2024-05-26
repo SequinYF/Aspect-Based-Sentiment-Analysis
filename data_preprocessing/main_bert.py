@@ -178,7 +178,7 @@ def predict_model_aspect_extraction(sentence, tokenizer):
 
 
 # Training the aspect extraction
-#train_model_aspect_extraction(train_loader_ate, 3)
+train_model_aspect_extraction(train_loader_ate, 3)
 
 # Loading the saved model for future use
 model_ATE = load_model(
@@ -271,7 +271,7 @@ def predict_model_aspect_sentimental_analysis(sentence, aspect, tokenizer):
 
 
 # Training the aspect based sentiment analysis
-#train_model_aspect_sentimental_analysis(train_loader_absa, 6)
+train_model_aspect_sentimental_analysis(train_loader_absa, 6)
 
 # Loading the saved model for future use
 model_ABSA = load_model(
@@ -303,12 +303,6 @@ def AspectExtractionSentimentAnalysis(text):
     aspect_key, polarity_key = get_key_polarity(x, terms, sentiment)
     return x, terms if terms else [], sentiment if sentiment else [], aspect_key, polarity_key
 
-# Loading the models again for use
-# model_ABSA = load_model(
-#     model_ABSA, f'{model_location}bert_aspect_sentiment_analysis.pkl')
-# model_ATE = load_model(
-#     model_ATE, f'{model_location}bert_aspect_extraction.pkl')
-
 
 positive_in_file_path = f"{data_location}train_positive_reviews.txt"
 negative_in_file_path = f"{data_location}train_negative_reviews.txt"
@@ -333,8 +327,9 @@ neg_test = read_file(neg_test_in_file_path)
 pos_val = read_file(pos_val_in_file_path)
 neg_val = read_file(neg_val_in_file_path)
 
-reviews_list = [positive_reviews, negative_reviews,pos_test, neg_test,pos_val_in_file_path, neg_val_in_file_path]
+reviews_list = [positive_reviews, negative_reviews,pos_test, neg_test,pos_val, neg_val]
 output_list = [positive_out_file_path, negative_out_file_path,pos_test_out_file_path, neg_test_out_file_path,pos_val_out_file_path, neg_val_out_file_path]
+
 # process imdb
 print('Starting process imdb')
 
@@ -343,21 +338,6 @@ print('Starting process imdb')
 # test = pos + neg = 25k
 # val = pos + neg = 5k
 # Total = 50k
-
-# for reviews, output_file_path in zip(reviews_list, output_list):
-#     with open(output_file_path, mode='w', newline='', encoding='utf-8') as csv_file:
-#         csv_writer = csv.writer(csv_file)
-#         csv_writer.writerow(['Review', 'Aspects', 'Aspect Key', 'Sentiments'])
-#         data = []
-#         for review in tqdm(reviews):
-#             segment = pre_process(nlp_code(review))
-#             tokens, aspects, sentiments, aspect_key, polarity_key = AspectExtractionSentimentAnalysis(
-#                 review)
-#             data.append([tokens, aspects, aspect_key, polarity_key])
-#             csv_writer.writerows(data)
-#         csv_file.close()
-
-
 
 import concurrent.futures
 from tqdm import tqdm
@@ -400,6 +380,8 @@ def process_reviews(reviews, output_file_path, max_workers=8, batch_size=100):
         futures = []
         progress_bar = tqdm(total=len(reviews), unit='review')
         for review in reviews:
+            if not reviews:
+                continue
             future = executor.submit(process_review, review)
             futures.append(future)
 
