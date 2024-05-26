@@ -4,7 +4,7 @@ import torch
 import pandas as pd
 import warnings
 import sys
-sys.path.insert(1, '../dataset')
+sys.path.insert(1, '../IMDB')
 warnings.filterwarnings("ignore")
 
 
@@ -19,8 +19,6 @@ def train(work_type, batch=8, epochs=5, lr=3*1e-5, lr_schedule=False, adapter=Tr
          lr_schedule (bool): Whether to use learning rate scheduling (default: False).
          adapter (bool): Whether to use Adapter(default: True).
      """
-     
-    return
     # load
     data = pd.read_csv(TRAIN_DATA_PATH)
 

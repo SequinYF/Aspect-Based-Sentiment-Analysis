@@ -11,5 +11,6 @@ batch = 8
 lr = 3*1e-5
 epochs = 5
 
-TRAIN_DATA_PATH = '../dataset/normalized/restaurants_train.csv'
-TEST_DATA_PATH = '../dataset/normalized/restaurants_test.csv'
+TRAIN_DATA_PATH = '../IMDB/train_reviews_labelled_pr_bert.csv'
+VAL_DATA_PATH = '../IMDB/val_reviews_labelled_pr_bert.csv'
+TEST_DATA_PATH = '../IMDB/test_reviews_labelled_pr_bert.csv'
