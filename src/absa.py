@@ -70,7 +70,7 @@ class ABSABert(torch.nn.Module):
 
 class ABSAModel ():
     def __init__(self, tokenizer, adapter=True):
-        self.model = ABSABert('bert-base-uncased')
+        self.model = ABSABert('ber-large-uncased')
         self.tokenizer = tokenizer
         self.trained = False
         self.adapter = adapter

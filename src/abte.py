@@ -16,8 +16,8 @@ class ABTEDataset(Dataset):
         self.tokenizer = tokenizer
 
     def __getitem__(self, idx):
-        tokens, tags, pols = self.df.iloc[idx, :3].values
-
+        # https://www.saltdatalabs.com/blog/bert-how-to-handle-long-documents
+        tokens, tags, pols = self.df.iloc[idx, :3].values 
         tokens = tokens.replace("'", "").strip("][").split(', ')
         tags = tags.strip('][').split(', ')
         pols = pols.strip('][').split(', ')
@@ -25,18 +25,39 @@ class ABTEDataset(Dataset):
         bert_tokens = []
         bert_tags = []
         bert_pols = []
+
         for i in range(len(tokens)):
             t = self.tokenizer.tokenize(tokens[i])
-            bert_tokens += t
-            bert_tags += [int(tags[i])]*len(t)
-            bert_pols += [int(pols[i])]*len(t)
-        
+            if len(bert_tokens) + len(t) <= 512:
+                bert_tokens += t
+                bert_tags += [int(tags[i])] * len(t)
+                bert_pols += [int(pols[i])] * len(t)
+            else:
+                break
+
+        # [CLS] & [SEP]
+        bert_tokens = ['[CLS]'] + bert_tokens[:510] + ['[SEP]']
+        bert_tags = [0] + bert_tags[:510] + [0]
+        bert_pols = [0] + bert_pols[:510] + [0]
+
         bert_ids = self.tokenizer.convert_tokens_to_ids(bert_tokens)
 
         ids_tensor = torch.tensor(bert_ids)
         tags_tensor = torch.tensor(bert_tags)
         pols_tensor = torch.tensor(bert_pols)
         return bert_tokens, ids_tensor, tags_tensor, pols_tensor
+        # for i in range(len(tokens)):
+        #     t = self.tokenizer.tokenize(tokens[i])
+        #     bert_tokens += t
+        #     bert_tags += [int(tags[i])]*len(t)
+        #     bert_pols += [int(pols[i])]*len(t)
+        
+        # bert_ids = self.tokenizer.convert_tokens_to_ids(bert_tokens)
+
+        # ids_tensor = torch.tensor(bert_ids)
+        # tags_tensor = torch.tensor(bert_tags)
+        # pols_tensor = torch.tensor(bert_pols)
+        # return bert_tokens, ids_tensor, tags_tensor, pols_tensor
 
     def __len__(self):
         return len(self.df)

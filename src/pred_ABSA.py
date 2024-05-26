@@ -49,11 +49,11 @@ def run_ABSA_test_train(work_type, adapter, lr_schedule):
     modelABSA = None
     if work_type == 'ABSA':
         modelABSA = ABSAModel(tokenizer, adapter=adapter)
-        model_path = dir_name+'/model_lr1e-05_epochs4_batch8.pkl'
+        model_path = dir_name+'/model_lr1e-05_epochs2_batch8.pkl'
         lr = 1e-5
     elif work_type == 'ABTE':
         modelABSA = ABTEModel(tokenizer, adapter=adapter)
-        model_path = dir_name+'/model_lr3.0000000000000004e-05_epochs4_batch8.pkl'
+        model_path = dir_name+'/model_lr3.0000000000000004e-05_epochs2_batch8.pkl'
     else:
         raise Exception('wrong work type, must be ABSA or ABTE')
         

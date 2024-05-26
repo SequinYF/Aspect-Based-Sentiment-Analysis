@@ -1,3 +1,12 @@
+'''
+Author: Yifei Wang
+Github: ephiewangyf@gmail.com
+Date: 2024-05-25 12:12:07
+LastEditors: ephie && ephiewangyf@gmail.com
+LastEditTime: 2024-05-26 18:44:23
+FilePath: /Aspect-Based-Sentiment-Analysis/src/train_ABSA.py
+Description: 
+'''
 from consts import *
 import fire
 import torch
@@ -8,7 +17,7 @@ sys.path.insert(1, '../IMDB')
 warnings.filterwarnings("ignore")
 
 
-def train(work_type, batch=8, epochs=5, lr=3*1e-5, lr_schedule=False, adapter=True):
+def train(work_type, batch=16, epochs=5, lr=3*1e-5, lr_schedule=False, adapter=True):
     """Train the model.
 
      Args:
@@ -19,6 +28,8 @@ def train(work_type, batch=8, epochs=5, lr=3*1e-5, lr_schedule=False, adapter=Tr
          lr_schedule (bool): Whether to use learning rate scheduling (default: False).
          adapter (bool): Whether to use Adapter(default: True).
      """
+    if type(lr) == str:
+        lr = eval(lr)
     # load
     data = pd.read_csv(TRAIN_DATA_PATH)
 
@@ -32,7 +43,7 @@ def train(work_type, batch=8, epochs=5, lr=3*1e-5, lr_schedule=False, adapter=Tr
     else:
         DEVICE = torch.device("cpu")  # otherwise cpu
     print(f"Using device: {DEVICE}")
-
+    print(f"Learning rate: {lr}, Batch size: {batch}, Epochs: {epochs}")
     if work_type == 'ABTE':
         from abte import ABTEModel
         modelABTE = ABTEModel(tokenizer, adapter)
