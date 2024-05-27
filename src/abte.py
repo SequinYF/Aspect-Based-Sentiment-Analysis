@@ -196,6 +196,8 @@ class ABTEModel ():
 
         word_pieces = list(self.tokenizer.tokenize(sentence))
         ids = self.tokenizer.convert_tokens_to_ids(word_pieces)
+        if len(ids) >= 512:
+            ids = ids[:512]
         input_tensor = torch.tensor([ids]).to(device)
 
         #predict
@@ -271,7 +273,7 @@ class ABTEModel ():
                 trueth += list([int(j) for i in tags_tensors for j in i ])
         
         acc = self._accuracy(pred, trueth)
-        class_report = classification_report(trueth, pred, target_names=['none', 'start of AT', 'mark of AT'])
+        class_report = classification_report(trueth, pred, target_names=['start of AT', 'mark of AT'])
         return acc, class_report
 
     def accuracy(self, data, load_model=None, device='cpu'):

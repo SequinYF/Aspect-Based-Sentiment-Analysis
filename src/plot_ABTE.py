@@ -22,7 +22,6 @@ def _get_df():
     test_pred = dftest['Predicted']
     
     #load
-    data = pd.read_csv(TRAIN_DATA_PATH)
     data_test = pd.read_csv(TEST_DATA_PATH)
     
     test_tags_real = [t.strip('][').split(', ') for t in data_test['Tags']]
@@ -125,4 +124,4 @@ def gen_word_cloud():
 
 def get_example(coun=10):
     ABTE_data = _get_df()
-    return ABTE_data.head(20)
+    return ABTE_data.head(coun)

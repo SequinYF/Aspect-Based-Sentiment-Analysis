@@ -62,11 +62,10 @@ def run_ABSA_test_train(work_type, adapter, lr_schedule):
         os.makedirs(dir_name+'/results')
 
     print(model_path)
-    test_accuracy, test_report = modelABSA.test(
-        data_test, load_model=model_path, device=DEVICE)
     train_accuracy, train_report = modelABSA.test(
         data, load_model=model_path, device=DEVICE)
-    
+    test_accuracy, test_report = modelABSA.test(
+        data_test, load_model=model_path, device=DEVICE)
     #accuracy
     test_accuracy = np.array(test_accuracy)
     train_accuracy = np.array(train_accuracy)
@@ -82,13 +81,15 @@ def run_ABSA_test_train(work_type, adapter, lr_schedule):
     with open(dir_name+'/results/train_report_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
         for r in train_report.split('\n'):
             f.write(r + '\n')
+    with open(dir_name+'/results/train_accuracy_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
+        f.write(str(train_accuracy))
 
     DEVICE = 'cpu' #otherwise 'RuntimeError: Placeholder storage has not been allocated on MPS device!' in mac
     train_pred, train_pol = modelABSA.predict_batch(
         data, load_model=model_path, device=DEVICE)
     test_pred, test_pol = modelABSA.predict_batch(
         data_test, load_model=model_path, device=DEVICE)
-
+    
     # predictions
     data_test['Predicted'] = test_pred
     data_test['Actual'] = test_pol
@@ -100,10 +101,6 @@ def run_ABSA_test_train(work_type, adapter, lr_schedule):
     data.to_csv(dir_name+'/results/train_pred_lr{}_epochs{}_batch{}.csv'.format(lr,
                 epochs, batch), index=False)
 
-    with open(dir_name+'/results/train_accuracy_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
-        f.write(str(train_accuracy))
-
-
 def prediction(work_type, adapter=True, lr_schedule=False):
     """Predict the model.
 
@@ -112,7 +109,7 @@ def prediction(work_type, adapter=True, lr_schedule=False):
          lr_schedule (bool): Whether to use learning rate scheduling (default: False).
          adapter (bool): Whether to use Adapter(default: True).
      """
-    run_ABSA_test_train(work_type, adapter=True, lr_schedule=False)
+    run_ABSA_test_train(work_type, adapter=adapter, lr_schedule=lr_schedule)
     
     
 if __name__ == '__main__':

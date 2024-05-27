@@ -1,3 +1,12 @@
+'''
+Author: Yifei Wang
+Github: ephiewangyf@gmail.com
+Date: 2024-05-25 12:12:07
+LastEditors: ephie && ephiewangyf@gmail.com
+LastEditTime: 2024-05-27 21:46:38
+FilePath: /Aspect-Based-Sentiment-Analysis/src/utils.py
+Description: 
+'''
 from matplotlib.transforms import Bbox
 import pandas as pd
 import numpy as np
@@ -12,7 +21,8 @@ def tag_to_word(sentence, predictions):
     terms = []
     for i, word in enumerate(sentence):
         w = None
-        if predictions[i] == 1:
+        # casue we trim the sentence before 
+        if len(predictions) > i and predictions[i] == 1:
             w = word 
             for j in range(i+1, len(sentence)):
                 if predictions[i] == 2:
