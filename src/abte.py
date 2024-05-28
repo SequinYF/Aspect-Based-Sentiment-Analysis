@@ -199,7 +199,7 @@ class ABTEModel ():
         if len(ids) >= 512:
             ids = ids[:512]
         input_tensor = torch.tensor([ids]).to(device)
-
+        self.model = self.model.to(device)
         #predict
         with torch.no_grad():
             outputs = self.model(input_tensor, None, None)

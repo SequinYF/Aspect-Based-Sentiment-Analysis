@@ -49,11 +49,11 @@ def run_ABSA_test_train(work_type, adapter, lr_schedule):
     modelABSA = None
     if work_type == 'ABSA':
         modelABSA = ABSAModel(tokenizer, adapter=adapter)
-        model_path = dir_name+'/model_lr1e-05_epochs2_batch8.pkl'
+        model_path = dir_name+'/model_lr3.0000000000000004e-05_epochs2_batch16.pkl'
         lr = 1e-5
     elif work_type == 'ABTE':
         modelABSA = ABTEModel(tokenizer, adapter=adapter)
-        model_path = dir_name+'/model_lr3.0000000000000004e-05_epochs2_batch8.pkl'
+        model_path = dir_name+'/model_lr3.0000000000000004e-05_epochs2_batch16.pkl'
     else:
         raise Exception('wrong work type, must be ABSA or ABTE')
     
@@ -84,7 +84,8 @@ def run_ABSA_test_train(work_type, adapter, lr_schedule):
     with open(dir_name+'/results/train_accuracy_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
         f.write(str(train_accuracy))
 
-    DEVICE = 'cpu' #otherwise 'RuntimeError: Placeholder storage has not been allocated on MPS device!' in mac
+    # DEVICE = 'cpu' #otherwise 'RuntimeError: Placeholder storage has not been allocated on MPS device!' in mac
+    print(adapter, lr_schedule, DEVICE)
     train_pred, train_pol = modelABSA.predict_batch(
         data, load_model=model_path, device=DEVICE)
     test_pred, test_pol = modelABSA.predict_batch(
