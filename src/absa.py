@@ -197,20 +197,22 @@ class ABSAModel ():
 
         t1 = self.tokenizer.tokenize(sentence)
         t2 = self.tokenizer.tokenize(aspect)
+        if  len(t1) + len(t2) > 510:
+            t1 = t1[: 510-len(t2)]
 
         word_pieces = ['[cls]']
         word_pieces += t1
         word_pieces += ['[sep]']
         word_pieces += t2
-
+        
+        self.model = self.model.to(device)
         segment_tensor = [0] + [0]*len(t1) + [0] + [1]*len(t2)
 
         ids = self.tokenizer.convert_tokens_to_ids(word_pieces)
         input_tensor = torch.tensor([ids]).to(device)
         segment_tensor = torch.tensor(segment_tensor).to(device)
-
         with torch.no_grad():
-            outputs = self.model(input_tensor, None, None, segments_tensors=segment_tensor).to(device)
+            outputs = self.model(input_tensor, None, None, segments_tensors=segment_tensor)
             _, predictions = torch.max(outputs, dim=1)
         
         return word_pieces, int(predictions)-1, outputs
@@ -240,8 +242,7 @@ class ABSAModel ():
         else:
             if not self.trained:
                 raise Exception('model not trained')
-        
-        self.model = self.model.to(device)
+
         predictions = []
 
         for i in tqdm(range(len(data))):
