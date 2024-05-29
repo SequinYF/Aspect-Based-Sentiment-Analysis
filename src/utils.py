@@ -3,7 +3,7 @@ Author: Yifei Wang
 Github: ephiewangyf@gmail.com
 Date: 2024-05-25 12:12:07
 LastEditors: ephie && ephiewangyf@gmail.com
-LastEditTime: 2024-05-27 21:46:38
+LastEditTime: 2024-05-29 11:00:23
 FilePath: /Aspect-Based-Sentiment-Analysis/src/utils.py
 Description: 
 '''
@@ -43,6 +43,8 @@ def tag_to_word_df(df, column_name, tags):
     for i in range(len(df)):
         sentence = df.iloc[i]['Tokens']
         sentence = sentence.replace("'", "").strip("][").split(', ')
+        if i > len(tags) -1:
+            continue
         terms = tag_to_word(sentence, tags[i])
         terms_list.append(terms)
     df[column_name] = terms_list

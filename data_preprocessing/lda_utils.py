@@ -27,8 +27,8 @@ lemmatizer = WordNetLemmatizer()
 def pre_process(text):
     tokens = [word for word in nltk.word_tokenize(text.lower()) if word.isalpha()]
     tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
-    return ' '.join(tokens)
-
+    #return ' '.join(tokens)
+    return tokens
 
 def get_processed_doc(full_document):
     processed_docs = [pre_process(doc) for doc in full_document]
@@ -38,6 +38,7 @@ def get_processed_doc(full_document):
 def get_dictionary_corpus(processed_doc):
     # Create a dictionary representation of the documents
     dictionary = corpora.Dictionary(processed_doc)
+
     # Convert document into the bag-of-words format
     corpus = [dictionary.doc2bow(doc) for doc in processed_doc]
     return dictionary, corpus
