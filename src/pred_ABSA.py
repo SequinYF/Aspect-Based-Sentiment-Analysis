@@ -62,27 +62,27 @@ def run_ABSA_test_train(work_type, adapter, lr_schedule):
         os.makedirs(dir_name+'/results')
 
     print(model_path)
-    # train_accuracy, train_report = modelABSA.test(
-    #     data, load_model=model_path, device=DEVICE)
-    # test_accuracy, test_report = modelABSA.test(
-    #     data_test, load_model=model_path, device=DEVICE)
-    # #accuracy
-    # test_accuracy = np.array(test_accuracy)
-    # train_accuracy = np.array(train_accuracy)
+    train_accuracy, train_report = modelABSA.test(
+        data, load_model=model_path, device=DEVICE)
+    test_accuracy, test_report = modelABSA.test(
+        data_test, load_model=model_path, device=DEVICE)
+    #accuracy
+    test_accuracy = np.array(test_accuracy)
+    train_accuracy = np.array(train_accuracy)
 
-    # with open(dir_name+'/results/test_accuracy_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
-    #      f.write(str(test_accuracy))
+    with open(dir_name+'/results/test_accuracy_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
+         f.write(str(test_accuracy))
 
-    #     #report
-    # with open(dir_name+'/results/test_report_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
-    #     for r in test_report.split('\n'):
-    #         f.write(r + '\n')
+        #report
+    with open(dir_name+'/results/test_report_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
+        for r in test_report.split('\n'):
+            f.write(r + '\n')
 
-    # with open(dir_name+'/results/train_report_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
-    #     for r in train_report.split('\n'):
-    #         f.write(r + '\n')
-    # with open(dir_name+'/results/train_accuracy_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
-    #     f.write(str(train_accuracy))
+    with open(dir_name+'/results/train_report_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
+        for r in train_report.split('\n'):
+            f.write(r + '\n')
+    with open(dir_name+'/results/train_accuracy_lr{}_epochs{}_batch{}.csv'.format(lr, epochs, batch), 'w') as f:
+        f.write(str(train_accuracy))
 
     # DEVICE = 'cpu' #otherwise 'RuntimeError: Placeholder storage has not been allocated on MPS device!' in mac
     print(adapter, lr_schedule, DEVICE)
