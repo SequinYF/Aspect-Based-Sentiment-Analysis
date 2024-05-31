@@ -31,14 +31,91 @@ https://ai.stanford.edu/~amaas/data/sentiment
 
 ### Dataset
 
-Change the path of the dataset in `consts.py`. Data need to be formatted as in Data Pre Label.
+Change the path of the dataset in `consts.py`. Data need to be formatted as in `Data Pre Label`.
 
-Examples: `todo`
 
-### ABTE
+### ABSA
+
+#### Fast Run
+1. `python -m train_ABSA ABTE` 
+2. `python -m train_ABSA ABSA` 
+3. `python -m pred_ABSA ABSA` 
+4. `python -m pred_ABSA ABSA` 
+
+#### Comprehensive Run
 
 1. `train.sh ABTE`
 2. `prediction.sh ABTE`
+
+#### MAN
+
+##### Train
+```
+NAME
+    train_ABSA.py - Train the model.
+
+SYNOPSIS
+    train_ABSA.py WORK_TYPE <flags>
+
+DESCRIPTION
+    Train the model.
+
+POSITIONAL ARGUMENTS
+    WORK_TYPE
+        Training for which task choices: ['ABTE', 'ABSA']
+
+FLAGS
+    -b, --batch=BATCH
+        Default: 16
+        Batch size for training (default: 5).
+    -e, --epochs=EPOCHS
+        Default: 3
+        Number of training epochs (default: 8).
+    --lr=LR
+        Default: 3.0000000000000004e-05
+        Learning rate (default: 3*1e-5).
+    --lr_schedule=LR_SCHEDULE
+        Default: False
+        Whether to use learning rate scheduling (default: False).
+    -a, --adapter=ADAPTER
+        Default: True
+        Whether to use Adapter(default: True).
+
+NOTES
+    You can also use flags syntax for POSITIONAL ARGUMENTS
+(END)
+```
+
+##### Predict
+```
+NAME
+    pred_ABSA.py - Predict the model.
+
+SYNOPSIS
+    pred_ABSA.py WORK_TYPE <flags>
+
+DESCRIPTION
+    Predict the model.
+
+POSITIONAL ARGUMENTS
+    WORK_TYPE
+        Training for which task choices: ['ABTE', 'ABSA']
+
+FLAGS
+    -a, --adapter=ADAPTER
+        Default: True
+        Whether to use Adapter(default: True).
+    -l, --lr_schedule=LR_SCHEDULE
+        Default: False
+        Whether to use learning rate scheduling (default: False).
+
+NOTES
+    You can also use flags syntax for POSITIONAL ARGUMENTS
+(END)
+
+
+```
+
 
 #### Plot
 

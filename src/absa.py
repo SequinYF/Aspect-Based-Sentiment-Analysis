@@ -43,10 +43,9 @@ class ABSADataset(Dataset):
         segment_tensor = torch.tensor(segment_tensor)
 
         return bert_tokens, ids_tensor, segment_tensor, pols_tensor
-
     def __len__(self):
         return len(self.df)
-
+    
 class ABSABert(torch.nn.Module):
     def __init__(self, pretrain_model, adapter=True):
         super(ABSABert, self).__init__()
@@ -151,7 +150,9 @@ class ABSAModel ():
                 segments_tensors = segments_tensors.to(device)
                 label_ids = label_ids.to(device)
                 masks_tensors = masks_tensors.to(device)
-
+                #print (ids_tensors.shape, segments_tensors.shape, label_ids.shape, masks_tensors.shape)
+                if ids_tensors.size(1) > 512:
+                    continue
                 loss = self.model(ids_tensors=ids_tensors, lable_tensors=label_ids, 
                                     masks_tensors=masks_tensors, segments_tensors=segments_tensors)
                 self.losses.append(loss.item())
@@ -196,18 +197,20 @@ class ABSAModel ():
 
         t1 = self.tokenizer.tokenize(sentence)
         t2 = self.tokenizer.tokenize(aspect)
+        if  len(t1) + len(t2) > 510:
+            t1 = t1[: 510-len(t2)]
 
         word_pieces = ['[cls]']
         word_pieces += t1
         word_pieces += ['[sep]']
         word_pieces += t2
-
+        
+        self.model = self.model.to(device)
         segment_tensor = [0] + [0]*len(t1) + [0] + [1]*len(t2)
 
         ids = self.tokenizer.convert_tokens_to_ids(word_pieces)
         input_tensor = torch.tensor([ids]).to(device)
         segment_tensor = torch.tensor(segment_tensor).to(device)
-
         with torch.no_grad():
             outputs = self.model(input_tensor, None, None, segments_tensors=segment_tensor)
             _, predictions = torch.max(outputs, dim=1)
@@ -239,7 +242,7 @@ class ABSAModel ():
         else:
             if not self.trained:
                 raise Exception('model not trained')
-        
+
         predictions = []
 
         for i in tqdm(range(len(data))):
@@ -280,7 +283,7 @@ class ABSAModel ():
 
         pred = []#padded list
         trueth = [] #padded list
-     
+        self.model = self.model.to(device)
         with torch.no_grad():
             for data in tqdm(loader):
             
@@ -288,6 +291,8 @@ class ABSAModel ():
                 ids_tensors = ids_tensors.to(device)
                 segments_tensors = segments_tensors.to(device)
                 masks_tensors = masks_tensors.to(device)
+                if ids_tensors.size(1) > 512:
+                    continue
 
                 outputs = self.model(ids_tensors, None, masks_tensors=masks_tensors, 
                                     segments_tensors=segments_tensors)

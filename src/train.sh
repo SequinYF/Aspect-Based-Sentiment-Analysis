@@ -2,8 +2,8 @@
 # Usage: ./train.sh ABTE
 
 
-batch=8
-epochs=5
+batch=16
+epochs=3
 lr_schedule_values=("False", "True")
 adapter_values=("True" "False")
 
