@@ -15,7 +15,7 @@ ABSA typically involves two sub-tasks:
 * Aspect-Based Sentiment Analysis (ABSA): The goal of ABSA is to determine the sentiment polarity (positive, negative, or neutral) expressed towards each identified aspect. It is formulated as a classification task, where the sentiment polarity is assigned to each aspect extracted from the text.
 
 ## Approach
-### Data Pre Label @omolojakazeem@gmail.com
+### Data Pre Label
  <img width="1221" alt="image" src="https://github.com/SequinYF/Aspect-Based-Sentiment-Analysis/assets/19517164/97868851-f848-4105-b0cd-1ec118bc4dd9">
 
 ### Dataset
@@ -119,10 +119,7 @@ NOTES
 
 #### Plot
 
-Related Paper: @https://github.com/aminahjaved @usmanishaq589@gmail.com
 
-contribution：
-@
 
 Ref：
 * https://github.com/nicolezattarin/BERT-Aspect-Based-Sentiment-Analysis
